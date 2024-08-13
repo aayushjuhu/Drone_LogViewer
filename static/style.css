@@ -1,0 +1,63 @@
+.tbl{
+    height: 400px;
+    width: fit-content;
+    overflow-y: scroll;
+    overflow-x: visible;
+    margin-top: 5%;
+    margin-left: 18%;
+}
+
+/* #strtlst{
+    overflow-y: scroll; 
+    height: 200px;
+} */
+
+/* Custom styles for submenu */
+.dropdown-menu li {
+    position: relative;
+}
+.dropdown-menu .dropdown-submenu {
+    display: none;
+    position: absolute;
+    left: 100%;
+    top: -7px;
+}
+.dropdown-menu .dropdown-submenu-left {
+    right: 100%;
+    left: auto;
+}
+.dropdown-menu > li:hover > .dropdown-submenu {
+    display: block;
+}
+
+.form-class{
+    margin-top: 20%;
+}
+
+body{
+    font-family: Oswald;
+}
+
+.form-class button{
+    margin-top: 2%;
+    margin-left: 48%;
+}
+
+#loading {
+    display: none;
+    text-align: center;
+    font-size: 1.5em;
+    color: #333;
+}
+
+#load{
+    display: none;
+    text-align: center;
+    font-size: 1.5em;
+    color: #333;
+}
+
+.btn-outline-info{
+    --bs-btn-color:black
+
+}
