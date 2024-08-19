@@ -30,6 +30,10 @@
     display: block;
 }
 
+.file-section {
+    margin-bottom: 20px;
+}
+
 .form-class{
     margin-top: 20%;
 }
@@ -50,7 +54,7 @@ body{
     color: #333;
 }
 
-#load{
+#load, #load1{
     display: none;
     text-align: center;
     font-size: 1.5em;
@@ -60,4 +64,8 @@ body{
 .btn-outline-info{
     --bs-btn-color:black
 
+}
+
+#cont1{
+    border-right: 2px solid black;
 }
