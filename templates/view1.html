@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oswald">
+    <link rel="stylesheet" href="static/style.css">
+    <title>LogViewer | Home</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row mt-2">
+            <div class="col-sm-12">
+                <h1 class="text-center">View Logs</h1>
+                <div class="dropdown text-center">
+                    <a class="btn btn-secondary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        Select File
+                    </a>
+
+                    <ul class="dropdown-menu">
+                        {% for item in files %}
+                        <li><a id="drpitm" onclick="clkd()" class="dropdown-item"
+                                href="{{ url_for('view1', filename=item) }}">{{ item }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <p id="load">Loading....Please Wait.</p>
+                {% if table %}
+                <div class="tbl text-center">
+                    {{ table | safe }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <h1 class="text-center">Visualize</h1>
+        <form action="/view" method="POST">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="dropdown text-center">
+                            <a class="btn btn-secondary dropdown-toggle mt-2" href="#" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                Select Parameters
+                            </a>
+                            <ul id="strtlst" class="dropdown-menu">
+                                {% for file, cols in cl.items() %}
+                                <li>
+                                    <a class="dropdown-item" href="#">{{ file }}</a>
+                                    {% if uv and file in uv %}
+                                    <!-- Dropdown for unique values -->
+                                    <ul class="dropdown-menu dropdown-submenu">
+                                        {% for n in uv[file] %}
+                                        <li>
+                                            <a class="dropdown-item" href="#">{{ n }}</a>
+                                            <!-- Dropdown for columns -->
+                                            <ul class="dropdown-menu dropdown-submenu">
+                                                {% for col in cols %}
+                                                <li>
+                                                    <input class="form-check-input" name="selected_col1" value="{{ file }}{{n}}[{{ col }}]"
+                                                        type="checkbox" id="{{ file }}_{{ col }}_{{ n }}">
+                                                    <label class="form-check-label" for="{{ file }}_{{ col }}_{{ n }}">{{ col }}</label>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% else %}
+                                    <!-- Simple dropdown for columns -->
+                                    <ul class="dropdown-menu dropdown-submenu">
+                                        {% for col in cols %}
+                                        <li>
+                                            <input class="form-check-input" name="selected_col" value="{{ file }}[{{ col }}]"
+                                                type="checkbox" id="{{ file }}_{{ col }}">
+                                            <label class="form-check-label" for="{{ file }}_{{ col }}">{{ col }}</label>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% endif %}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            
+                        </div>
+                    </div>
+
+                    <div class="col-sm-4">
+                        <div class="dropdown text-center">
+                            <a class="btn btn-secondary dropdown-toggle mt-2" href="#" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                Select Plot
+                            </a>
+                            <ul id="strtlst" class="dropdown-menu">
+                                <li><input class="form-check-input" value="Scatter" type="radio" name="plt_type"
+                                        id="flexRadioDefault1">
+                                    <label class="form-check-label" for="flexRadioDefault1">
+                                        Scatter
+                                    </label>
+                                </li>
+                                <li><input class="form-check-input" value="line" type="radio" name="plt_type"
+                                        id="flexRadioDefault2">
+                                    <label class="form-check-label" for="flexRadioDefault2">
+                                        Line
+                                    </label>
+                                </li>
+                                <li><input class="form-check-input" value="Histogram" type="radio" name="plt_type"
+                                        id="flexRadioDefault3">
+                                    <label class="form-check-label" for="flexRadioDefault3">
+                                        Histogram
+                                    </label>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-4 text-center mt-2">
+                        <button class="btn btn-secondary" type="submit" onclick="clkd1()">Visualize</button>
+                    </div>
+                </div>
+                <p id="load1">Loading....Please Wait.</p>
+
+                <div class="graph mt-4" style="height: 50%;">
+                    {% if fig %}
+                    {{ fig | safe }}
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function clkd() {
+            document.getElementById('load').style.display = 'block';
+        }
+
+        function clkd1() {
+            document.getElementById('load1').style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>
