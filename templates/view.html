@@ -12,11 +12,6 @@
     <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oswald">
     <link rel="stylesheet" href="static/style.css">
-    <script>
-        $(function() {
-         $(".graph").load("static/graph.html");
-      });
-    </script>
     <title>LogViewer | Home</title>
 </head>
 
@@ -36,7 +31,6 @@
                         <li><a id="drpitm" onclick="clkd()" class="dropdown-item"
                                 href="{{ url_for('view1', filename=item) }}">{{item}}</a></li>
                         {% endfor %}
-
                     </ul>
                 </div>
                 <p id="load">Loading....Please Wait.</p>
@@ -51,7 +45,7 @@
         <form action="/view" method="POST">
             <div class="container">
                 <div class="row">
-                    <div class="col-sm-6">
+                    <div class="col-sm-4">
                         <div class="dropdown text-center">
                             <a class="btn btn-secondary dropdown-toggle" href="#" role="button"
                                 data-bs-toggle="dropdown" aria-expanded="false">
@@ -62,8 +56,10 @@
                                 <li><a class="dropdown-item" href="#">{{file}}</a>
                                     <ul class="dropdown-menu dropdown-submenu">
                                         {% for col in cols %}
-                                        <li><input class="form-check-input" name="selected_col" value="{{file}}[{{col}}]" type="checkbox" id="{{ col }}">
-                                        <label class="form-check-label" for="{{ col }}">{{ col }}</label></li>
+                                        <li><input class="form-check-input" required name="selected_col"
+                                                value="{{file}}[{{col}}]" type="checkbox" id="{{ col }}">
+                                            <label class="form-check-label" for="{{ col }}">{{ col }}</label>
+                                        </li>
                                         {% endfor %}
                                     </ul>
                                 </li>
@@ -72,18 +68,49 @@
                         </div>
 
                     </div>
-                    <div class="col-sm-6 text-center mt-2">
+                    <div class="col-sm-4">
+                        <div class="dropdown text-center">
+                            <a class="btn btn-secondary dropdown-toggle" href="#" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                Select Plot
+                            </a>
+                            <ul id="strtlst" class="dropdown-menu">
+                                <li><input class="form-check-input" value="Scatter" type="radio" required name="plt_type" id="flexRadioDefault1">
+                                    <label class="form-check-label" for="flexRadioDefault1">
+                                      Scatter
+                                    </label>
+                                </li> 
+                                <li><input class="form-check-input" value="line" type="radio" required name="plt_type" id="flexRadioDefault1">
+                                    <label class="form-check-label" for="flexRadioDefault1">
+                                      Line
+                                    </label>
+                                </li> 
+                                <li><input class="form-check-input" value="Histogram" type="radio" name="plt_type" required id="flexRadioDefault1">
+                                    <label class="form-check-label" for="flexRadioDefault1">
+                                      Histogram
+                                    </label>
+                                </li> 
+                            </ul>
+
+                        </div>
+                    </div>
+                    <div class="col-sm-4 text-center mt-2">
                         <button class="btn btn-secondary" type="submit">Visualize</button>
                     </div>
+
                 </div>
+
                 <div class="graph mt-4" style="height: 50%;">
                     {% if fig %}
-                        {{ fig|safe }}
+                    {{ fig|safe }}
                     {% endif %}
                 </div>
             </div>
-        </form>
     </div>
+    </div>
+    </form>
+    </div>
+
     <script>
         function clkd() {
             document.getElementById('load').style.display = 'block'
