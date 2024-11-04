@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oswald">
     <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap-switch-button@1.1.0/css/bootstrap-switch-button.min.css"
@@ -18,23 +19,47 @@
     <link rel="shortcut icon" href="/static/img/flaticon.png" type="image/x-icon">
     <link rel="stylesheet" href="static/css/style.css">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> <!--To manipulate graphs-->
-    <title>LogViewer | Home</title>
+    <title>LogViewer | Visualize</title>
 </head>
 
 <body>
-    <div class="row mt-2">
-        <div class="col-sm-6">
-            <a href="/"><img id="logo" src="/static/img/logo.png" alt=""></a>
-        </div>
-        <div class="col-sm-6">
-            <div class="togg">
-                <form method="POST">
-                    <input type="checkbox" id="modeselect" name="modeselect" data-toggle="switchbutton" checked
-                        data-onlabel="Static" data-offlabel="Dynamic" data-onstyle="secondary"
-                        data-offstyle="secondary">
-                </form>
+    <style>
+        body{
+            overflow: scroll;
+        }
+    </style>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"><img src="/static/img/logo.png" width="140vh" height="auto"
+                    class="d-inline-block align-top" alt="lovant-logo"></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/view">Visualize</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/droneatt">Drone State</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/residual">Residual</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dronepath">Drone Path</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Home</a>
+                    </li>
+                </ul>
             </div>
         </div>
+    </nav>
+
+    <div class="row mt-2">
         <div class="col-sm-12">
             <h1 class="text-center">View Logs</h1>
             <div class="dropdown text-center">
@@ -52,435 +77,511 @@
             </div>
             <p id="load" style="display:none;">Loading....Please Wait.</p>
             {% if tbl %}
-            <div class="tbl">
+            <div class="tbl {% if is_single_row %}single-row{% else %}multiple-rows{% endif %}">
                 {{ tbl | safe }}
             </div>
             {% endif %}
         </div>
     </div>
     <hr>
-    <h1 class="text-center">Visualize</h1>
+    <div class="row">
+        <div class="col-sm-12 text-center">
+            <h1 id="visualize">Visualize</h1>
+            <p>Note: Start plotting from plot 1</p>
+        </div>
+    </div>
+    <p id="load1" style="display:none; text-align: center;">Plot 1 Loading....Please Wait.</p>
+    <p id="load2" style="display:none; text-align: center;">Plot 2 Loading....Please Wait.</p>
+    <p id="load3" style="display:none; text-align: center;">Plot 3 Loading....Please Wait.</p>
+    <p id="load4" style="display:none; text-align: center;">Plot 4 Loading....Please Wait.</p>
+    <div class="row">
+        <div class="col-sm-12 text-right">
+            <div class="togg">
+                <form method="POST">
+                    <input type="checkbox" id="modeselect" name="modeselect" data-toggle="switchbutton" checked
+                        data-onlabel="Static" data-offlabel="Dynamic" data-onstyle="secondary"
+                        data-offstyle="secondary">
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- <a href="/logout"><button class="btn btn-secondary">Back</button></a> -->
 
     <!-- -----------------------------First set of plots------------------------------------------------->
     <!-- ------------------------------Plot 1-------------------------------------------------->
     <!-- <div class="container"> -->
-    <div class="row">
-        <div class="col-sm-6">
-            <div class="row">
-                <form id="form1" class="pltform" method="POST">
-                    <!-- <div id="cont1" class="container"> -->
-                    <div class="row">
-                        <div class="col-sm-4">
-                            <div class="dropdown text-center">
-                                <a class="btn btn-secondary dropdown-toggle mt-2" href="#" role="button"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    Select Parameters
-                                </a>
-                                <ul id="strtlst1" class="dropdown-menu">
-                                    {% for file, cols in cl.items() %}
-                                    <li class="dropdown-item">
-                                        {{ file }}
-                                        {% if uv and file in uv %}
-                                        <ul class="dropdown-menu dropdown-submenu">
-                                            {% for n in uv[file] %}
-                                            <li>
-                                                <a class="dropdown-item" href="#">{{ n }}</a>
-                                                <ul class="dropdown-menu dropdown-submenu">
-                                                    {% for col in cols %}
-                                                    <li>
-                                                        <input class="form-check-input" name="unv1"
-                                                            value="{{ file }}{{n}}[{{ col }}]" type="checkbox"
-                                                            id="{{ file }}_{{ col }}_{{ n }}">
-                                                        <label class="form-check-label"
-                                                            for="{{ file }}_{{ col }}_{{ n }}">{{ col }}</label>
-                                                    </li>
-                                                    {% endfor %}
-                                                </ul>
-                                            </li>
-                                            {% endfor %}
-                                        </ul>
-                                        {% else %}
-                                        <ul class="dropdown-menu dropdown-submenu">
-                                            {% for col in cols %}
-                                            <li>
-                                                <input class="form-check-input" name="selected_col1"
-                                                    value="{{ file }}[{{ col }}]" type="checkbox"
-                                                    id="{{ file }}_{{ col }}">
-                                                <label class="form-check-label" for="{{ file }}_{{ col }}">{{ col
-                                                    }}</label>
-                                            </li>
-                                            {% endfor %}
-                                        </ul>
-                                        {% endif %}
-                                    </li>
-                                    {% endfor %}
-                                </ul>
-
-                            </div>
-                        </div>
-                        <div class="col-sm-4">
-                            <div class="dropdown text-center">
-                                <a class="btn btn-secondary dropdown-toggle mt-2" href="#" role="button"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    Select Plot
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li><input class="form-check-input" value="Scatter" type="radio" name="plt_type1"
-                                            id="flexRadioDefault1">
-                                        <label class="form-check-label" for="flexRadioDefault1">
-                                            Scatter
-                                        </label>
-                                    </li>
-                                    <li><input class="form-check-input" value="line" type="radio" name="plt_type1"
-                                            id="flexRadioDefault2">
-                                        <label class="form-check-label" for="flexRadioDefault2">
-                                            Line
-                                        </label>
-                                    </li>
-                                    <li><input class="form-check-input" value="Histogram" type="radio" name="plt_type1"
-                                            id="flexRadioDefault3">
-                                        <label class="form-check-label" for="flexRadioDefault3">
-                                            Histogram
-                                        </label>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="col-sm-4 text-center mt-2">
-                            <button class="btn btn-secondary" type="submit">Visualize</button>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <p id="load1" style="display:none;">Loading....Please Wait.</p>
-                        </div>
-                        <div class="graph mt-2">
-                            <div id="fig1-container">
-                                {% if fig1 %}
-                                {{ fig1 | safe }}
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    <!-- </div> -->
-                </form>
-            </div>
-        </div>
-        <!-- ------------------------------Plot 2----------------------------------------------- -->
-
-        <div class="col-sm-6">
-            <div class="row">
-                <form id="form2" class="pltform" method="POST">
-                    <div id="cont2">
+    <div class="graph-cont">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="row">
+                    <form id="form1" class="pltform" method="POST">
+                        <!-- <div id="cont1" class="container"> -->
                         <div class="row">
-                            <div class="col-sm-4">
-                                <div class="dropdown text-center">
-                                    <a class="btn btn-secondary dropdown-toggle mt-2" href="#" role="button"
+                            <div class="col-sm-12 text-center">
+                                <div class="btn-group dropend">
+                                    <button type="submit" class="btn btn-secondary">Visualize</button>
+                                    <button type="button"
+                                        class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
                                         data-bs-toggle="dropdown" aria-expanded="false">
-                                        Select Parameters
-                                    </a>
-                                    <ul id="strtlst2" class="dropdown-menu">
-                                        {% for file, cols in cl.items() %}
-                                        <li>
-                                            <a class="dropdown-item" href="#">{{ file }}</a>
-                                            {% if uv and file in uv %}
-                                            <ul class="dropdown-menu dropdown-submenu">
-                                                {% for n in uv[file] %}
-                                                <li>
-                                                    <a class="dropdown-item" href="#">{{ n }}</a>
-                                                    <ul class="dropdown-menu dropdown-submenu">
-                                                        {% for col in cols %}
+                                        <span class="visually-hidden">Toggle Dropdown</span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#">Parameters</a>
+                                            <ul class="dropdown-menu dropdown-submenu1">
+                                                {% for file, cols in cl.items() %}
+                                                <li class="dropdown-item">
+                                                    {{ file }}
+                                                    {% if uv and file in uv %}
+                                                    <ul class="dropdown-menu dropdown-submenu1">
+                                                        {% for n in uv[file] %}
                                                         <li>
-                                                            <input class="form-check-input" name="unv2"
-                                                                value="{{ file }}{{n}}[{{ col }}]" type="checkbox"
-                                                                id="{{ file }}_{{ col }}_{{ n }}">
-                                                            <label class="form-check-label"
-                                                                for="{{ file }}_{{ col }}_{{ n }}">{{ col }}</label>
+                                                            <a class="dropdown-item" href="#">{{ n }}</a>
+                                                            <ul class="dropdown-menu dropdown-submenu1">
+                                                                {% for col in cols %}
+                                                                <li>
+                                                                    <input class="form-check-input ucolumn-checkbox"
+                                                                        name="unv1" value="{{ file }}{{n}}[{{ col }}]"
+                                                                        type="checkbox"
+                                                                        id="{{ file }}_{{ col }}_{{ n }}">
+                                                                    <label class="form-check-label"
+                                                                        title="{% if col=='Roll' %} Movement around side-side axis{% elif col=='Pitch' %} Movement around front-back {% elif col=='Yaw' %} Movement around vertical axis {% endif %}"
+                                                                        for="{{ file }}_{{ col }}_{{ n }}">{{ col
+                                                                        }}</label>
+                                                                </li>
+                                                                {% endfor %}
+                                                            </ul>
                                                         </li>
                                                         {% endfor %}
                                                     </ul>
+                                                    {% else %}
+                                                    <ul class="dropdown-menu dropdown-submenu1">
+                                                        {% for col in cols %}
+                                                        <li>
+                                                            <input class="form-check-input column-checkbox"
+                                                                name="selected_col1" value="{{ file }}[{{ col }}]"
+                                                                type="checkbox" id="{{ file }}_{{ col }}">
+                                                            <label class="form-check-label"
+                                                                title="{% if col=='Roll' %} Movement around side-side axis{% elif col=='Pitch' %} Movement around front-back {% elif col=='Yaw' %} Movement around vertical axis {% endif %}"
+                                                                for="{{ file }}_{{ col }}">{{ col
+                                                                }}</label>
+                                                        </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                    {% endif %}
                                                 </li>
                                                 {% endfor %}
                                             </ul>
-                                            {% else %}
-                                            <ul class="dropdown-menu dropdown-submenu">
-                                                {% for col in cols %}
-                                                <li>
-                                                    <input class="form-check-input" name="selected_col2"
-                                                        value="{{ file }}[{{ col }}]" type="checkbox"
-                                                        id="{{ file }}_{{ col }}">
-                                                    <label class="form-check-label" for="{{ file }}_{{ col }}">{{ col
-                                                        }}</label>
-                                                </li>
-                                                {% endfor %}
-                                            </ul>
-                                            {% endif %}
                                         </li>
-                                        {% endfor %}
+
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li><a class="dropdown-item" href="#">Plot type</a>
+                                            <ul class="dropdown-menu dropdown-submenu1">
+                                                <li><input class="form-check-input plt" value="Scatter" type="radio"
+                                                        name="plt_type1" id="flexRadioDefault1">
+                                                    <label class="form-check-label" for="flexRadioDefault1">
+                                                        Scatter
+                                                    </label>
+                                                </li>
+                                                <li><input class="form-check-input plt" value="line" type="radio"
+                                                        name="plt_type1" id="flexRadioDefault2">
+                                                    <label class="form-check-label" for="flexRadioDefault2">
+                                                        Line
+                                                    </label>
+                                                </li>
+                                                <li><input class="form-check-input plt" value="Histogram" type="radio"
+                                                        name="plt_type1" id="flexRadioDefault3">
+                                                    <label class="form-check-label" for="flexRadioDefault3">
+                                                        Histogram
+                                                    </label>
+                                                </li>
+                                            </ul>
+                                        </li>
                                     </ul>
                                 </div>
                             </div>
-                            <div class="col-sm-4">
-                                <div class="dropdown text-center">
-                                    <a class="btn btn-secondary dropdown-toggle mt-2" href="#" role="button"
+                        </div>
+                        <div class="row">
+                            <div class="graph mt-2">
+                                <div id="fig1-container">
+                                    {% if fig1 %}
+                                    {{ fig1 | safe }}
+                                    {% endif %}
+                                </div>
+                                <h2 class="text-center">Plot 1</h2>
+
+                            </div>
+                        </div>
+                        <!-- </div> -->
+                    </form>
+                </div>
+            </div>
+            <!-- ------------------------------Plot 2----------------------------------------------- -->
+
+            <div class="col-sm-6">
+                <div class="row">
+                    <form id="form2" class="pltform" method="POST">
+                        <!-- <div id="cont1" class="container"> -->
+                        <div class="row">
+                            <div class="col-sm-12 text-center">
+                                <div class="btn-group dropstart">
+                                    <button type="button"
+                                        class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
                                         data-bs-toggle="dropdown" aria-expanded="false">
-                                        Select Plot
-                                    </a>
+                                        <span class="visually-hidden">Toggle Dropdown</span>
+                                    </button>
+                                    <button type="submit" class="btn btn-secondary">Visualize</button>
                                     <ul class="dropdown-menu">
-                                        <li><input class="form-check-input" value="Scatter" type="radio"
-                                                name="plt_type2" id="flexRadioDefault4">
-                                            <label class="form-check-label" for="flexRadioDefault4">
-                                                Scatter
-                                            </label>
+                                        <li><a class="dropdown-item" href="#">Parameters</a>
+                                            <ul class="dropdown-menu dropdown-submenu1">
+                                                {% for file, cols in cl.items() %}
+                                                <li class="dropdown-item">
+                                                    {{ file }}
+                                                    {% if uv and file in uv %}
+                                                    <ul class="dropdown-menu dropdown-submenu1">
+                                                        {% for n in uv[file] %}
+                                                        <li>
+                                                            <a class="dropdown-item" href="#">{{ n }}</a>
+                                                            <ul class="dropdown-menu dropdown-submenu1">
+                                                                {% for col in cols %}
+                                                                <li>
+                                                                    <input class="form-check-input column-checkbox"
+                                                                        name="unv2" value="{{ file }}{{n}}[{{ col }}]"
+                                                                        type="checkbox"
+                                                                        id="{{ file }}_{{ col }}_{{ n }}">
+                                                                    <label class="form-check-label"
+                                                                        title="{% if col=='Roll' %} Movement around side-side axis{% elif col=='Pitch' %} Movement around front-back {% elif col=='Yaw' %} Movement around vertical axis {% endif %}"
+                                                                        for="{{ file }}_{{ col }}_{{ n }}">{{ col
+                                                                        }}</label>
+                                                                </li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                    {% else %}
+                                                    <ul class="dropdown-menu dropdown-submenu1">
+                                                        {% for col in cols %}
+                                                        <li>
+                                                            <input class="form-check-input column-checkbox"
+                                                                name="selected_col2" value="{{ file }}[{{ col }}]"
+                                                                type="checkbox" id="{{ file }}_{{ col }}">
+                                                            <label class="form-check-label"
+                                                                title="{% if col=='Roll' %} Movement around side-side axis{% elif col=='Pitch' %} Movement around front-back {% elif col=='Yaw' %} Movement around vertical axis {% endif %}"
+                                                                for="{{ file }}_{{ col }}">{{ col
+                                                                }}</label>
+                                                        </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                    {% endif %}
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
                                         </li>
-                                        <li><input class="form-check-input" value="line" type="radio" name="plt_type2"
-                                                id="flexRadioDefault5">
-                                            <label class="form-check-label" for="flexRadioDefault5">
-                                                Line
-                                            </label>
+                                        <li>
+                                            <hr class="dropdown-divider">
                                         </li>
-                                        <li><input class="form-check-input" value="Histogram" type="radio"
-                                                name="plt_type2" id="flexRadioDefault6">
-                                            <label class="form-check-label" for="flexRadioDefault6">
-                                                Histogram
-                                            </label>
+                                        <li><a class="dropdown-item" href="#">Plot type</a>
+                                            <ul class="dropdown-menu dropdown-submenu1">
+                                                <li><input class="form-check-input plt" value="Scatter" type="radio"
+                                                        name="plt_type2" id="flexRadioDefault1">
+                                                    <label class="form-check-label" for="flexRadioDefault1">
+                                                        Scatter
+                                                    </label>
+                                                </li>
+                                                <li><input class="form-check-input plt" value="line" type="radio"
+                                                        name="plt_type2" id="flexRadioDefault2">
+                                                    <label class="form-check-label" for="flexRadioDefault2">
+                                                        Line
+                                                    </label>
+                                                </li>
+                                                <li><input class="form-check-input plt" value="Histogram" type="radio"
+                                                        name="plt_type2" id="flexRadioDefault3">
+                                                    <label class="form-check-label" for="flexRadioDefault3">
+                                                        Histogram
+                                                    </label>
+                                                </li>
+                                            </ul>
                                         </li>
                                     </ul>
                                 </div>
-                            </div>
-                            <div class="col-sm-4 text-center mt-2">
-                                <button class="btn btn-secondary" type="submit">Visualize</button>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-sm-12">
-                                <p id="load2" style="display:none;">Loading....Please Wait.</p>
-                                <div class="graph mt-2">
-                                    <div id="fig2-container">
-                                        {% if fig2 %}
-                                        {{ fig2 | safe }}
-                                        {% endif %}
+                                <!-- <p id="load2" style="display:none;">Loading....Please Wait.</p> -->
+                            </div>
+                            <div class="graph mt-2">
+                                <div id="fig2-container">
+                                    {% if fig2 %}
+                                    {{ fig2 | safe }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <!-- {% if stats %}{% endif %} -->
+                            <!-- <div id="stats1"></div> -->
+                            <h2 class="text-center">Plot 2</h2>
+                        </div>
+                        <!-- </div> -->
+                    </form>
+                </div>
+            </div>
+
+
+            <!-- ------------------------------------------------Second set of plots--------------------------------------------- -->
+            <!-- --------------------------------plot 3------------------------------------------------------------------------ -->
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="row">
+                        <form id="form3" class="pltform" method="POST">
+                            <div id="cont3">
+                                <div class="row">
+                                    <div class="graphcont">
+                                    </div>
+                                    <div class="col-sm-12 text-center">
+                                        <div class="btn-group dropend">
+                                            <button type="submit" class="btn btn-secondary">Visualize</button>
+                                            <button type="button"
+                                                class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
+                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                                <span class="visually-hidden">Toggle Dropdown</span>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#">Parameters</a>
+                                                    <ul class="dropdown-menu dropdown-submenu">
+                                                        {% for file, cols in cl.items() %}
+                                                        <li class="dropdown-item">
+                                                            {{ file }}
+                                                            {% if uv and file in uv %}
+                                                            <ul class="dropdown-menu dropdown-submenu">
+                                                                {% for n in uv[file] %}
+                                                                <li>
+                                                                    <a class="dropdown-item" href="#">{{ n }}</a>
+                                                                    <ul class="dropdown-menu dropdown-submenu">
+                                                                        {% for col in cols %}
+                                                                        <li>
+                                                                            <input class="form-check-input " name="unv3"
+                                                                                value="{{ file }}{{n}}[{{ col }}]"
+                                                                                type="checkbox"
+                                                                                id="{{ file }}_{{ col }}_{{ n }}">
+                                                                            <label class="form-check-label"
+                                                                                title="{% if col=='Roll' %} Movement around side-side axis{% elif col=='Pitch' %} Movement around front-back {% elif col=='Yaw' %} Movement around vertical axis {% endif %}"
+                                                                                for="{{ file }}_{{ col }}_{{ n }}">{{
+                                                                                col }}</label>
+                                                                        </li>
+                                                                        {% endfor %}
+                                                                    </ul>
+                                                                </li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                            {% else %}
+                                                            <ul class="dropdown-menu dropdown-submenu">
+                                                                {% for col in cols %}
+                                                                <li>
+                                                                    <input class="form-check-input" name="selected_col3"
+                                                                        value="{{ file }}[{{ col }}]" type="checkbox"
+                                                                        id="{{ file }}_{{ col }}">
+                                                                    <label class="form-check-label"
+                                                                        title="{% if col=='Roll' %} Movement around side-side axis{% elif col=='Pitch' %} Movement around front-back {% elif col=='Yaw' %} Movement around vertical axis {% endif %}"
+                                                                        for="{{ file }}_{{ col }}">{{ col
+                                                                        }}</label>
+                                                                </li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                            {% endif %}
+                                                        </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                </li>
+                                                <li>
+                                                    <hr class="dropdown-divider">
+                                                </li>
+                                                <li><a class="dropdown-item" href="#">Plot type</a>
+                                                    <ul class="dropdown-menu dropdown-submenu">
+                                                        <li><input class="form-check-input" value="Scatter" type="radio"
+                                                                name="plt_type3" id="flexRadioDefault1">
+                                                            <label class="form-check-label" for="flexRadioDefault1">
+                                                                Scatter
+                                                            </label>
+                                                        </li>
+                                                        <li><input class="form-check-input" value="line" type="radio"
+                                                                name="plt_type3" id="flexRadioDefault2">
+                                                            <label class="form-check-label" for="flexRadioDefault2">
+                                                                Line
+                                                            </label>
+                                                        </li>
+                                                        <li><input class="form-check-input" value="Histogram"
+                                                                type="radio" name="plt_type3" id="flexRadioDefault3">
+                                                            <label class="form-check-label" for="flexRadioDefault3">
+                                                                Histogram
+                                                            </label>
+                                                        </li>
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <!-- <p id="load3" style="display:none;">Loading....Please Wait.</p> -->
+                                        <div class="graph mt-2">
+                                            <div id="fig3-container">
+                                                {% if fig3 %}
+                                                {{ fig3 | safe }}
+                                                {% endif %}
+                                            </div>
+                                            <h2 class="text-center">Plot 3</h2>
+                                        </div>
+                                        <!-- <div id="stats2"></div> -->
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </form>
                     </div>
-                </form>
-            </div>
-        </div>
+                </div>
+                <!-- ------------------------------Plot 4----------------------------------------------- -->
 
+                <div class="col-sm-6">
+                    <div class="row">
+                        <form id="form4" class="pltform" method="POST">
+                            <div id="cont4">
+                                <div class="row">
 
-        <!-- ------------------------------------------------Second set of plots--------------------------------------------- -->
-        <!-- --------------------------------plot3------------------------------------------------------------------------ -->
-        <div class="row">
-            <div class="col-sm-6">
-                <div class="row">
-                    <form id="form3" class="pltform" method="POST">
-                        <div id="cont3">
-                            <div class="row">
-                                <div class="col-sm-4">
-                                    <div class="dropdown text-center">
-                                        <a class="btn btn-secondary dropdown-toggle mt-2" href="#" role="button"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
-                                            Select Parameters
-                                        </a>
-                                        <ul id="strtlst1" class="dropdown-menu">
-                                            {% for file, cols in cl.items() %}
-                                            <li>
-                                                <a class="dropdown-item" href="#">{{ file }}</a>
-                                                {% if uv and file in uv %}
-                                                <ul class="dropdown-menu dropdown-submenu">
-                                                    {% for n in uv[file] %}
-                                                    <li>
-                                                        <a class="dropdown-item" href="#">{{ n }}</a>
-                                                        <ul class="dropdown-menu dropdown-submenu">
-                                                            {% for col in cols %}
-                                                            <li>
-                                                                <input class="form-check-input" name="unv3"
-                                                                    value="{{ file }}{{n}}[{{ col }}]" type="checkbox"
-                                                                    id="{{ file }}_{{ col }}_{{ n }}">
-                                                                <label class="form-check-label"
-                                                                    for="{{ file }}_{{ col }}_{{ n }}">{{ col }}</label>
-                                                            </li>
-                                                            {% endfor %}
-                                                        </ul>
-                                                    </li>
-                                                    {% endfor %}
-                                                </ul>
-                                                {% else %}
-                                                <ul class="dropdown-menu dropdown-submenu">
-                                                    {% for col in cols %}
-                                                    <li>
-                                                        <input class="form-check-input" name="selected_col3"
-                                                            value="{{ file }}[{{ col }}]" type="checkbox"
-                                                            id="{{ file }}_{{ col }}">
-                                                        <label class="form-check-label" for="{{ file }}_{{ col }}">{{
-                                                            col }}</label>
-                                                    </li>
-                                                    {% endfor %}
-                                                </ul>
+                                    <div class="col-sm-12 text-center">
+                                        <div class="btn-group dropstart">
+                                            <button type="button"
+                                                class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
+                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                                <span class="visually-hidden">Toggle Dropdown</span>
+                                            </button>
+                                            <button type="submit" class="btn btn-secondary">Visualize</button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#">Parameters</a>
+                                                    <ul class="dropdown-menu dropdown-submenu">
+                                                        {% for file, cols in cl.items() %}
+                                                        <li class="dropdown-item">
+                                                            {{ file }}
+                                                            {% if uv and file in uv %}
+                                                            <ul class="dropdown-menu dropdown-submenu">
+                                                                {% for n in uv[file] %}
+                                                                <li>
+                                                                    <a class="dropdown-item" href="#">{{ n }}</a>
+                                                                    <ul class="dropdown-menu dropdown-submenu">
+                                                                        {% for col in cols %}
+                                                                        <li>
+                                                                            <input class="form-check-input" name="unv4"
+                                                                                value="{{ file }}{{n}}[{{ col }}]"
+                                                                                type="checkbox"
+                                                                                id="{{ file }}_{{ col }}_{{ n }}">
+                                                                            <label class="form-check-label"
+                                                                                for="{{ file }}_{{ col }}_{{ n }}"
+                                                                                title="{% if col=='Roll' %} Movement around side-side axis{% elif col=='Pitch' %} Movement around front-back {% elif col=='Yaw' %} Movement around vertical axis {% endif %}">{{
+                                                                                col }}</label>
+                                                                        </li>
+                                                                        {% endfor %}
+                                                                    </ul>
+                                                                </li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                            {% else %}
+                                                            <ul class="dropdown-menu dropdown-submenu">
+                                                                {% for col in cols %}
+                                                                <li>
+                                                                    <input class="form-check-input" name="selected_col4"
+                                                                        value="{{ file }}[{{ col }}]" type="checkbox"
+                                                                        id="{{ file }}_{{ col }}">
+                                                                    <label class="form-check-label"
+                                                                        title="{% if col=='Roll' %} Movement around side-side axis{% elif col=='Pitch' %} Movement around front-back {% elif col=='Yaw' %} Movement around vertical axis {% endif %}"
+                                                                        for="{{ file }}_{{ col }}">{{ col
+                                                                        }}</label>
+                                                                </li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                            {% endif %}
+                                                        </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                </li>
+                                                <li>
+                                                    <hr class="dropdown-divider">
+                                                </li>
+                                                <li><a class="dropdown-item" href="#">Plot type</a>
+                                                    <ul class="dropdown-menu dropdown-submenu">
+                                                        <li><input class="form-check-input" value="Scatter" type="radio"
+                                                                name="plt_type4" id="flexRadioDefault1">
+                                                            <label class="form-check-label" for="flexRadioDefault1">
+                                                                Scatter
+                                                            </label>
+                                                        </li>
+                                                        <li><input class="form-check-input" value="line" type="radio"
+                                                                name="plt_type4" id="flexRadioDefault2">
+                                                            <label class="form-check-label" for="flexRadioDefault2">
+                                                                Line
+                                                            </label>
+                                                        </li>
+                                                        <li><input class="form-check-input" value="Histogram"
+                                                                type="radio" name="plt_type4" id="flexRadioDefault3">
+                                                            <label class="form-check-label" for="flexRadioDefault3">
+                                                                Histogram
+                                                            </label>
+                                                        </li>
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <!-- <p id="load4" style="display:none;">Loading....Please Wait.</p> -->
+                                        <div class="graph mt-2">
+                                            <div id="fig4-container">
+                                                {% if fig4 %}
+                                                {{ fig4 | safe }}
                                                 {% endif %}
-                                            </li>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="col-sm-4">
-                                    <div class="dropdown text-center">
-                                        <a class="btn btn-secondary dropdown-toggle mt-2" href="#" role="button"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
-                                            Select Plot
-                                        </a>
-                                        <ul class="dropdown-menu">
-                                            <li><input class="form-check-input" value="Scatter" type="radio"
-                                                    name="plt_type3" id="flexRadioDefault1">
-                                                <label class="form-check-label" for="flexRadioDefault1">
-                                                    Scatter
-                                                </label>
-                                            </li>
-                                            <li><input class="form-check-input" value="line" type="radio"
-                                                    name="plt_type3" id="flexRadioDefault2">
-                                                <label class="form-check-label" for="flexRadioDefault2">
-                                                    Line
-                                                </label>
-                                            </li>
-                                            <li><input class="form-check-input" value="Histogram" type="radio"
-                                                    name="plt_type3" id="flexRadioDefault3">
-                                                <label class="form-check-label" for="flexRadioDefault3">
-                                                    Histogram
-                                                </label>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="col-sm-4 text-center mt-2">
-                                    <button class="btn btn-secondary" type="submit">Visualize</button>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-sm-12">
-                                    <p id="load3" style="display:none;">Loading....Please Wait.</p>
-                                    <div class="graph mt-2">
-                                        <div id="fig3-container">
-                                            {% if fig3 %}
-                                            {{ fig3 | safe }}
-                                            {% endif %}
+                                            </div>
+                                            <!-- <div id="stats3"></div> -->
+                                            <h2 class="text-center">Plot 4</h2>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
+                <br><br><br><br><br>
             </div>
-            <!-- ------------------------------Plot 4----------------------------------------------- -->
-
-            <div class="col-sm-6">
-                <div class="row">
-                    <form id="form4" class="pltform" method="POST">
-                        <div id="cont4">
-                            <div class="row">
-                                <div class="col-sm-4">
-                                    <div class="dropdown text-center">
-                                        <a class="btn btn-secondary dropdown-toggle mt-2" href="#" role="button"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
-                                            Select Parameters
-                                        </a>
-                                        <ul id="strtlst2" class="dropdown-menu">
-                                            {% for file, cols in cl.items() %}
-                                            <li>
-                                                <a class="dropdown-item" href="#">{{ file }}</a>
-                                                {% if uv and file in uv %}
-                                                <ul class="dropdown-menu dropdown-submenu">
-                                                    {% for n in uv[file] %}
-                                                    <li>
-                                                        <a class="dropdown-item" href="#">{{ n }}</a>
-                                                        <ul class="dropdown-menu dropdown-submenu">
-                                                            {% for col in cols %}
-                                                            <li>
-                                                                <input class="form-check-input" name="unv4"
-                                                                    value="{{ file }}{{n}}[{{ col }}]" type="checkbox"
-                                                                    id="{{ file }}_{{ col }}_{{ n }}">
-                                                                <label class="form-check-label"
-                                                                    for="{{ file }}_{{ col }}_{{ n }}">{{ col }}</label>
-                                                            </li>
-                                                            {% endfor %}
-                                                        </ul>
-                                                    </li>
-                                                    {% endfor %}
-                                                </ul>
-                                                {% else %}
-                                                <ul class="dropdown-menu dropdown-submenu">
-                                                    {% for col in cols %}
-                                                    <li>
-                                                        <input class="form-check-input" name="selected_col4"
-                                                            value="{{ file }}[{{ col }}]" type="checkbox"
-                                                            id="{{ file }}_{{ col }}">
-                                                        <label class="form-check-label" for="{{ file }}_{{ col }}">{{
-                                                            col }}</label>
-                                                    </li>
-                                                    {% endfor %}
-                                                </ul>
-                                                {% endif %}
-                                            </li>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="col-sm-4">
-                                    <div class="dropdown text-center">
-                                        <a class="btn btn-secondary dropdown-toggle mt-2" href="#" role="button"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
-                                            Select Plot
-                                        </a>
-                                        <ul class="dropdown-menu">
-                                            <li><input class="form-check-input" value="Scatter" type="radio"
-                                                    name="plt_type4" id="flexRadioDefault4">
-                                                <label class="form-check-label" for="flexRadioDefault4">
-                                                    Scatter
-                                                </label>
-                                            </li>
-                                            <li><input class="form-check-input" value="line" type="radio"
-                                                    name="plt_type4" id="flexRadioDefault5">
-                                                <label class="form-check-label" for="flexRadioDefault5">
-                                                    Line
-                                                </label>
-                                            </li>
-                                            <li><input class="form-check-input" value="Histogram" type="radio"
-                                                    name="plt_type4" id="flexRadioDefault6">
-                                                <label class="form-check-label" for="flexRadioDefault6">
-                                                    Histogram
-                                                </label>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="col-sm-4 text-center mt-2">
-                                    <button class="btn btn-secondary" type="submit">Visualize</button>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-sm-12">
-                                    <p id="load4" style="display:none;">Loading....Please Wait.</p>
-                                    <div class="graph mt-2">
-                                        <div id="fig4-container">
-                                            {% if fig4 %}
-                                            {{ fig4 | safe }}
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <br><br><br><br><br>
         </div>
         <!-- </div> -->
 
         <!-- </div> -->
+        <footer id="foot" class="foot"></footer>
         <script type="text/javascript" src="static/js/script.js"></script>
+        <script>
+            const time = new Date()
+            document.getElementById('foot').innerHTML = "Copyright, " + time.getFullYear() + " Dronetech Solutions Pvt Ltd.";
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+        </script>
+        <div id="pltalt1" class="alert alert-secondary floating-alert d-none" role="alert">
+            Plot 1 Loading.....Please Wait
+        </div>
+        <div id="pltalt2" class="alert alert-secondary floating-alert d-none" role="alert">
+            Plot 2 Loading.....Please Wait
+        </div>
+        <div id="pltalt3" class="alert alert-secondary floating-alert d-none" role="alert">
+            Plot 3 Loading.....Please Wait
+        </div>
+        <div id="pltalt4" class="alert alert-secondary floating-alert d-none" role="alert">
+            Plot 4 Loading.....Please Wait
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+
 </body>
 
 </html>

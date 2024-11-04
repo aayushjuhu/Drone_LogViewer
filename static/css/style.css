@@ -3,14 +3,45 @@
     width: fit-content;
     overflow-y: scroll;
     overflow-x: visible;
-    /* margin-top: 5%;
-    margin-left: 18%; */
     margin: 0 auto;
+}
+
+#pltalt1 ,#pltalt2, #pltalt3, #pltalt4{
+    position: fixed;
+    top: 5%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1050; /* Ensures it appears above other content */
+    width: auto;
+    min-width: 300px;
+    text-align: center; /* Center text inside the alert */
+}
+
+#cesiumContainer {
+    height: 80vh;
+    /* width: 200vh; */
+
+    
+}   
+#altitudeGraph, #currGraph, #rpyGraph, #aglGraph{
+    height: 20vh;
+    margin-top: 0;
+}   
+
+#plotly-graph {
+    width: 100%;  /* The graph will fill the entire width of its container */
+    height: 10vh; /* Set height to 80% of the viewport height */
 }
 
 #sidepn{
     height: 100%;
     background-size: cover;
+}
+
+#axes{
+    position: absolute;
+    top: 25%;
+    right: 18%;
 }
 
 #sidepn img{
@@ -38,20 +69,36 @@
     margin-top: 1vh;
 }
 
+#stats-container1, #stats-container2, #stats-container3, #stats-container4, #resstats-container, #resstats1-container, #modstats-container{
+    background-color: #111111;
+    color: white;
+    padding-left: 2vh;
+}
+
 #uploadForm{    
     height: 40vh;
-    width: 80vh;
+    width: 100vh;
     margin: auto auto;
-    border-radius: 8%;
+    border-radius: 4%;
     align-content: center;
     /* box-shadow: 2px 2px 4px 4px rgb(222, 218, 218); */
     background-color: rgb(255, 255, 255);
     margin-top: 8%;
 }
 
+#btn-modal{
+    display: none;
+}
+
+
 
 .btn-outline-secondary{
     --bs-btn-color: black;
+}
+
+#leftpane{
+    align-content: center;
+    border-right: 2px solid #333;
 }
 
 
@@ -59,6 +106,8 @@
 .graph{
     height: 50%;
 }
+
+
 
 .togg{
     display: flex;
@@ -70,7 +119,38 @@
     --width: 20px;
 }
 
-/* Custom styles for submenu */
+#spinner {
+    display: none;  /* Hide spinner by default */
+    position: fixed; /* Fixed position to overlay the entire screen */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.7); /* Semi-transparent white background */
+    z-index: 1050; /* Ensure it overlays other content */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#bouncing-image {
+    width: 100px; /* Set the width of the image */
+    animation: bounce 2s infinite; /* Apply the bounce animation */
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0); /* Start at the original position */
+    }
+    40% {
+        transform: translateY(-30px); /* Move up */
+    }
+    60% {
+        transform: translateY(-15px); /* Move slightly down */
+    }
+}
+
+/* Custom styles for submenu right*/
 .dropdown-menu li {
     position: relative;
 }
@@ -79,18 +159,48 @@
 .dropdown-menu .dropdown-submenu {
     display: none;
     position: absolute;
+    white-space: nowrap;
     left: 100%;
     top: -7px;
 }
 .dropdown-menu .dropdown-submenu-left {
-    right: 100%;
-    left: auto;
+    right: 40%;
+    left: 100%;
 }
 .dropdown-menu > li:hover > .dropdown-submenu {
     display: block;
+    max-width: 200px;
+}
+
+/* Custom styles for submenu left*/
+.dropdown-menu li {
+    position: relative;
 }
 
 
+.dropdown-menu .dropdown-submenu1 {
+    display: none;
+    position: absolute;
+    white-space: nowrap;
+    left: 100%;
+    top: -7px;
+    right: 10%;
+}
+
+body, html {
+    height: 100%;          /* Full height for body and html */
+    margin: 0;             /* Remove default margin */
+    overflow: hidden;      /* Disable scrolling */
+}
+
+.dropdown-menu .dropdown-submenu-left1 {
+    right: 10%;
+    left: 100%;
+}
+.dropdown-menu > li:hover > .dropdown-submenu1 {
+    display: block;
+    max-width: 200px;
+}
 
 
 .file-section {
@@ -116,6 +226,8 @@ body{
     text-align: center;
     font-size: 1.5em;
     color: #333;
+    margin: 0 auto;
+    margin-top: 2vh;
 }
 
 #load, #load1, #load2, #load3, #load4{
@@ -141,6 +253,32 @@ body{
 
 }
 
+
+.single-row {
+    height: auto;        /* Automatically adjusts for a single row */
+    overflow: visible;   /* No overflow handling for single row */
+}
+
+.multiple-rows {
+    height: auto;        /* Dynamic height for multiple rows */
+    max-height: 500px;   /* Set max height if necessary */
+    overflow: auto;      /* Scroll if content exceeds max-height */
+}
+
+.foot{
+    background: white;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: auto;
+}
+
+
+.navbar{
+    background-color: transparent;
+}
+
 @media only screen and (max-width: 420px) {
     #uploadForm{    
         height: auto;
@@ -152,6 +290,7 @@ body{
         /* box-shadow: 2px 2px 4px 4px rgb(222, 218, 218); */
         margin-top: 8%;
         background-color: rgb(255, 255, 255);
+       
     }
     #landpg{
         overflow-y: hidden;
@@ -159,12 +298,23 @@ body{
         background-repeat: no-repeat;
         background-size: cover;
     }
+    #leftpane{
+        align-content: center;
+        border-bottom: 2px solid #333;
+        border-right: none;
+    }
+    .form-class{
+        margin-top: 5%;
+    }
+    .navbar{
+        background-color: #bcbfbe;
+    }
 }
 
 @media only screen and (max-width: 768px) {
     #uploadForm{    
         height: auto;
-        width: 60vh;
+        width: 65vh;
         padding: 2vh;
         margin: auto auto;
         border-radius: 8%;
@@ -178,5 +328,8 @@ body{
         background-image: url('/static/img/bg_mob.jpg');
         background-repeat: no-repeat;
         background-size: cover;
+    }
+    .navbar{
+        background-color: transparent;
     }
 }

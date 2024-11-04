@@ -12,7 +12,6 @@ def convert_bin_to_csv(bin_file, output_dir):
     creation_time = os.path.getctime(bin_file)
     # Convert the creation time to a datetime object
     creation_date = datetime.datetime.fromtimestamp(creation_time)
-    # log_date = datetime.datetime.fromtimestamp(os.path.getctime(bin_file)).date()
     # Open the binary log file
     mlog = mavutil.mavlink_connection(bin_file)
     
@@ -39,13 +38,16 @@ def convert_bin_to_csv(bin_file, output_dir):
             df = pd.DataFrame(msgs)
             # Convert milliseconds to HH:MM:SS in 'Timestamp' column if it exists
             if 'TimeUS' in df.columns:
-                df['TimeUS'] = pd.to_timedelta(df['TimeUS'], unit='ms')
-                # df['TimeUS'] = df['TimeUS'].apply(lambda x: x.replace(year=log_date.year, month=log_date.month))
-                df['TimeUS'] = creation_date + df['TimeUS']
-                df['TimeUS'] = df['TimeUS'].dt.strftime('%Y-%m-%d %H:%M:%S')
+                df['TimeUS'] = df['TimeUS'] / 1_000_000
+                # first_time_us = df['TimeUS'].iloc[0]  # Get the first TimeUS value
+                # df['TimeUS'] = (df['TimeUS'] - first_time_us) / 1_000_000  # Convert to seconds relative to the first entry
+                # Optionally add the creation date to interpret TimeUS relative to file creation
+                # df['TimeUS'] = creation_date + pd.to_timedelta(df['TimeUS'], unit='s')
+                # df['TimeUS'] = pd.to_datetime(df['TimeUS'])  # Ensure it's in datetime format
+                # df['TimeUS'] = df['TimeUS'].dt.strftime('%Y-%m-%d %H:%M:%S')
             # Write the DataFrame to a CSV file
             df.to_csv(csv_file, index=False)
         else:
-            print(f"No messages of type {msg_type} to write to CSV.")
+            print(f"No messages of type {msg_type} to write to CSV.")       
 
     print(f"Converted {bin_file} to CSV files in {output_dir}")
